@@ -1,12 +1,47 @@
+//Dependancies
 const express = require("express");
 const app = express();
+const mysql = require("mysql");
+const bodyparser = require("body-parser");
 
-app.get("/", (req, res) => {
-  return res.send("Received a GET HTTP method");
+//DB Connection.
+//For now we place sensitive details in a separate file in git ignore,
+//So randos won't access public-facing DB.
+const constr = require("./dbconstr");
+const conn = mysql.createConnection(constr.dbconstrvalues);
+
+conn.connect(function (err) {
+  if (err) throw err;
+  console.log("You are now connected with the store.");
 });
 
-app.post("/", (req, res) => {
-  return res.send("Received a POST HTTP method");
+app.use(bodyparser.json());
+app.use(
+  bodyparser.urlencoded({
+    extended: true,
+  })
+);
+
+app.get("/device", (req, res) => {
+  console.log("Received a GET method.");
+  conn.query("select * from tblDevices", function (error, results, fields) {
+    if (error) throw error;
+    res.end(JSON.stringify(results));
+  });
+});
+
+app.post("/device", (req, res) => {
+  console.log("Received a POST HTTP method");
+  var params = req.body;
+  console.log(params);
+  conn.query("INSERT INTO customer SET ?", params, function (
+    error,
+    results,
+    fields
+  ) {
+    if (error) throw error;
+    res.end(JSON.stringify(results));
+  });
 });
 
 app.put("/", (req, res) => {

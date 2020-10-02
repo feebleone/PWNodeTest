@@ -1,3 +1,6 @@
+#sensitive info
+dbconstr.js
+
 # Logs
 logs
 *.log
