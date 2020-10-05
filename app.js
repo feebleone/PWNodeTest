@@ -3,6 +3,7 @@ const express = require("express");
 const app = express();
 const mysql = require("mysql");
 const bodyparser = require("body-parser");
+const { v4: uuidv4 } = require("uuid");
 
 //DB Connection.
 //For now we place sensitive details in a separate file in git ignore,
@@ -25,12 +26,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(bodyparser.json());
 app.use(
   bodyparser.urlencoded({
     extended: true,
   })
 );
+
+const jsonParser = bodyparser.json();
 
 app.get("/devices", (req, res) => {
   console.log("Received a GET method.");
@@ -40,17 +42,21 @@ app.get("/devices", (req, res) => {
   });
 });
 
-app.post("/devices", (req, res) => {
+app.post("/devices", jsonParser, (req, res) => {
   console.log("Received a POST HTTP method");
-  var params = req.body;
-  console.log(params);
-  conn.query("INSERT INTO tblDevices SET ?", params, function (
-    error,
-    results,
-    fields
-  ) {
-    if (error) throw error;
-    res.end(JSON.stringify(results));
+  console.log(req.body);
+  var data = {
+    id: uuidv4(),
+    name: req.body.name,
+    description: req.body.description,
+    path: req.body.path,
+  };
+
+  console.log("Inserting into tblDecvices: " + data.stringify());
+  conn.query("INSERT INTO tblDevices SET ?", data, (err, result) => {
+    if (err) throw err;
+    console.log("Inserted " + result.affectedRows);
+    res.end(JSON.stringify(result));
   });
 });
 
