@@ -63,21 +63,25 @@ app.get("/devices/:id", (req, res) => {
 });
 
 app.post("/devices", jsonParser, (req, res) => {
-  console.log("Received a POST HTTP method");
-  console.log(req.body);
-  var data = {
-    id: uuidv4(),
-    name: req.body.name,
-    description: req.body.description,
-    path: req.body.path,
-  };
+  try {
+    console.log("Received a POST HTTP method");
+    console.log(req.body);
+    var data = {
+      id: uuidv4(),
+      name: req.body.name,
+      description: req.body.description,
+      path: req.body.path,
+    };
 
-  console.log("Inserting into tblDecvices: " + data.stringify());
-  conn.query("INSERT INTO tblDevices SET ?", data, (err, result) => {
-    if (err) throw err;
-    console.log("Inserted " + result.affectedRows);
-    res.end(JSON.stringify(result));
-  });
+    console.log("Inserting into tblDecvices: " + data.stringify());
+    conn.query("INSERT INTO tblDevices SET ?", data, (err, result) => {
+      if (err) throw err;
+      console.log("Inserted " + result.affectedRows);
+      res.end(JSON.stringify(result));
+    });
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 app.put("/devices", (req, res) => {
