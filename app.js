@@ -42,6 +42,26 @@ app.get("/devices", (req, res) => {
   });
 });
 
+app.get("/devices", (req, res) => {
+  console.log("Received a GET method.");
+  conn.query("select * from tblDevices", function (error, results, fields) {
+    if (error) throw error;
+    res.end(JSON.stringify(results));
+  });
+});
+
+app.get("/devices/:id", (req, res) => {
+  console.log("Received a GET single: " + req.params.id);
+  conn.query(
+    "SELECT * from tblDevices WHERE id=?",
+    [req.params.id],
+    (err, results, fields) => {
+      if (err) throw err;
+      res.send(JSON.stringify(results));
+    }
+  );
+});
+
 app.post("/devices", jsonParser, (req, res) => {
   console.log("Received a POST HTTP method");
   console.log(req.body);
