@@ -73,7 +73,7 @@ app.post("/devices", jsonParser, (req, res) => {
       path: req.body.path,
     };
 
-    console.log("Inserting into tblDecvices: " + data.stringify());
+    console.log("Inserting into tblDecvices: " + JSON.stringify(data));
     conn.query("INSERT INTO tblDevices SET ?", data, (err, result) => {
       if (err) throw err;
       console.log("Inserted " + result.affectedRows);
