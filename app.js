@@ -37,11 +37,16 @@ app.use(
 const jsonParser = bodyparser.json();
 
 app.get("/devices", (req, res) => {
-  console.log("Received a GET method.");
-  conn.query("select * from tblDevices", function (error, results, fields) {
-    if (error) throw error;
-    res.end(JSON.stringify(results));
-  });
+  try {
+    console.log("Received a GET method.");
+    conn.query("select * from tblDevices", function (error, results, fields) {
+      if (error) throw error;
+      res.send(JSON.stringify(results));
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).send("Unable to process request.");
+  }
 });
 
 app.get("/devices/:id", (req, res) => {
@@ -89,7 +94,7 @@ app.post("/devices", jsonParser, (req, res) => {
     conn.query("INSERT INTO tblDevices SET ?", data, (err, result) => {
       if (err) throw err;
       console.log("Inserted " + result.affectedRows);
-      res.end(JSON.stringify(result));
+      res.status(201).send(JSON.stringify(result));
     });
   } catch (e) {
     console.log(e);
@@ -113,7 +118,7 @@ app.put("/devices/:id", jsonParser, (req, res) => {
       (err, result) => {
         if (err) throw err;
         console.log("Updated record id" + req.params.id);
-        res.end(JSON.stringify(result));
+        res.send(JSON.stringify(result));
       }
     );
   } catch (e) {
@@ -133,7 +138,7 @@ app.delete("/devices/:id", (req, res) => {
         console.log("deleted device record id " + req.params.id);
         if (result.affectedRows == 0) {
           res.status(404).send("No records found with id " + req.params.id);
-        } else res.send();
+        } else res.status(204).send();
       }
     );
   } catch (e) {
@@ -151,8 +156,8 @@ app.delete("/devices/", (req, res) => {
         "deleted ALL (" + result.affectedRows + ") records from tblDevices"
       );
       if (result.affectedRows == 0) {
-        res.status(404).send("Not records found.");
-      } else res.send();
+        res.status(404).send("No records found.");
+      } else res.status(204).send();
     });
   } catch (e) {
     console.log(e);
