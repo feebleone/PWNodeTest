@@ -2,7 +2,7 @@
 const devicesDB = require("../db/devices_db");
 const { v4: uuidv4 } = require("uuid");
 
-const create = async (data) => {
+const addOne = async (data) => {
   try {
     var device = {
       id: uuidv4(),
@@ -29,8 +29,33 @@ const getAll = async () => {
   return results;
 };
 
+const updateOne = async (data) => {
+  try {
+    var device = {
+      id: data.id,
+      name: data.name,
+      description: data.description,
+      path: data.path,
+    };
+    const result = await devicesDB.updateOne(device);
+  } catch (e) {
+    throw new Error(e.message);
+  }
+};
+
+const deleteOne = async (id) => {
+  return await devicesDB.deleteOne(id);
+};
+
+const deleteAll = async () => {
+  return await devicesDB.deleteAll();
+};
+
 module.exports = {
-  create,
+  addOne,
   getOne,
   getAll,
+  updateOne,
+  deleteOne,
+  deleteAll,
 };

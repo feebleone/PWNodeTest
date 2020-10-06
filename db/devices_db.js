@@ -20,51 +20,36 @@ const getAll = async () => {
 };
 
 const getOne = async (id) => {
-  conn.query(
-    "SELECT * from tblDevices WHERE id=?",
-    [req.params.id],
-    (err, results, fields) => {
-      if (err) throw err;
-      console.log("retrieved " + results.length + " rec.");
-      return results;
-    }
-  );
+  const results = await conn.query("SELECT * from tblDevices WHERE id=?", [id]);
+  console.log("retrieved " + results.length + " rec.");
+  return results;
 };
 
 const addOne = async (device) => {
-  conn.query("INSERT INTO tblDevices SET ?", device, (err, result) => {
-    if (err) throw err;
-    console.log("Inserted " + result.affectedRows);
-    return result;
-  });
+  const result = await conn.query("INSERT INTO tblDevices SET ?", device);
+  console.log("Inserted " + result.affectedRows);
+  return result;
 };
 
 const updateOne = async (device) => {
-  conn.query(
-    "UPDATE tblDevices SET ? WHERE id = ?",
-    [device, device.id],
-    (err, result) => {
-      if (err) throw err;
-      console.log("Updated record id" + device.id);
-      return result;
-    }
-  );
+  const result = await conn.query("UPDATE tblDevices SET ? WHERE id = ?", [
+    device,
+    device.id,
+  ]);
+  console.log("Updated record id" + device.id);
+  return result;
 };
 
 const deleteOne = async (id) => {
-  conn.query("DELETE FROM tblDevices WHERE id = ?", [id], (err, result) => {
-    if (err) throw err;
-    console.log("deleted device record id " + req.params.id);
-    return result;
-  });
+  const result = await conn.query("DELETE FROM tblDevices WHERE id = ?", [id]);
+  console.log("deleted device record id " + id);
+  return result;
 };
 
 const deleteAll = async () => {
-  conn.query("DELETE FROM tblDevices", (err, result) => {
-    if (err) throw err;
-    console.log("deleted ALL (" + result.affectedRows + ") from tblDevices");
-    return result;
-  });
+  const result = await conn.query("DELETE FROM tblDevices");
+  console.log("deleted ALL (" + result.affectedRows + ") from tblDevices");
+  return result;
 };
 
 module.exports = {
