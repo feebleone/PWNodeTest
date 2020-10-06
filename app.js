@@ -19,11 +19,13 @@ conn.connect(function (err) {
 //Allow CORS -
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
   res.header(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
   );
-  next();
+  if (req.method == "OPTIONS") res.send(200);
+  else next();
 });
 
 app.use(
@@ -42,24 +44,34 @@ app.get("/devices", (req, res) => {
   });
 });
 
-app.get("/devices", (req, res) => {
-  console.log("Received a GET method.");
-  conn.query("select * from tblDevices", function (error, results, fields) {
-    if (error) throw error;
-    res.end(JSON.stringify(results));
-  });
-});
-
 app.get("/devices/:id", (req, res) => {
-  console.log("Received a GET single: " + req.params.id);
-  conn.query(
-    "SELECT * from tblDevices WHERE id=?",
-    [req.params.id],
-    (err, results, fields) => {
-      if (err) throw err;
-      res.send(JSON.stringify(results));
-    }
-  );
+  try {
+    console.log("Received a GET single: " + req.params.id);
+    conn.query(
+      "SELECT * from tblDevices WHERE id=?",
+      [req.params.id],
+      (err, results, fields) => {
+        if (err) throw err;
+        if (results.length == 0) {
+          res.status(404).send("No records found with id " + req.params.id);
+        } else if (results.length > 1) {
+          console.log(
+            "Exception gjiji3ijg occured: Multiple records with identical keys found. Key: " +
+              req.params.id
+          );
+          res
+            .status(500)
+            .send(
+              "We had an internal error. An administrator will review the error."
+            );
+        }
+        res.send(JSON.stringify(results[0]));
+      }
+    );
+  } catch (e) {
+    console.log(e);
+    res.status(500).send("Unable to process request.");
+  }
 });
 
 app.post("/devices", jsonParser, (req, res) => {
@@ -73,7 +85,7 @@ app.post("/devices", jsonParser, (req, res) => {
       path: req.body.path,
     };
 
-    console.log("Inserting into tblDecvices: " + JSON.stringify(data));
+    console.log("Inserting into tblDevices: " + JSON.stringify(data));
     conn.query("INSERT INTO tblDevices SET ?", data, (err, result) => {
       if (err) throw err;
       console.log("Inserted " + result.affectedRows);
@@ -81,15 +93,71 @@ app.post("/devices", jsonParser, (req, res) => {
     });
   } catch (e) {
     console.log(e);
+    res.status(500).send("Unable to process request.");
   }
 });
 
-app.put("/devices", (req, res) => {
-  return res.send("Received a PUT HTTP method");
+app.put("/devices/:id", jsonParser, (req, res) => {
+  try {
+    console.log("Received a PUT HTTP method");
+    console.log(req.body);
+    console.log(req.params.id);
+    var data = {
+      name: req.body.name,
+      description: req.body.description,
+      path: req.body.path,
+    };
+    conn.query(
+      "UPDATE tblDevices SET ? WHERE id = ?",
+      [data, req.params.id],
+      (err, result) => {
+        if (err) throw err;
+        console.log("Updated record id" + req.params.id);
+        res.end(JSON.stringify(result));
+      }
+    );
+  } catch (e) {
+    console.log(e);
+    res.status(500).send("Unable to process request.");
+  }
 });
 
-app.delete("/devices", (req, res) => {
-  return res.send("Received a DELETE HTTP method");
+app.delete("/devices/:id", (req, res) => {
+  try {
+    console.log("Received a devices/DELETE cmd for id " + req.params.id);
+    conn.query(
+      "DELETE FROM tblDevices WHERE id = ?",
+      [req.params.id],
+      (err, result) => {
+        if (err) throw err;
+        console.log("deleted device record id " + req.params.id);
+        if (result.affectedRows == 0) {
+          res.status(404).send("No records found with id " + req.params.id);
+        } else res.send();
+      }
+    );
+  } catch (e) {
+    console.log(e);
+    res.status(500).send("Unable to process request.");
+  }
+});
+
+app.delete("/devices/", (req, res) => {
+  try {
+    console.log("Received a devices/DELETE ALL cmd.");
+    conn.query("DELETE FROM tblDevices", (err, result) => {
+      if (err) throw err;
+      console.log(
+        "deleted ALL (" + result.affectedRows + ") records from tblDevices"
+      );
+      if (result.affectedRows == 0) {
+        res.status(404).send("Not records found.");
+      } else res.send();
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).send("Unable to delete ALL of the records.");
+  }
 });
 
 app.listen(process.env.port || 3001);
