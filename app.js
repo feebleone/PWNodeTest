@@ -3,9 +3,18 @@ const express = require("express");
 const app = express();
 // const mysql = require("mysql");
 const bodyparser = require("body-parser");
-const { v4: uuidv4 } = require("uuid");
+// const { v4: uuidv4 } = require("uuid");
 
 const device_routes = require("./routes/devices_routes");
+const sensor_routes = require("./routes/sensors_routes");
+
+const sensorstest = require("./db/sensors_db");
+const sensors_controller = require("./controllers/sensors_controller");
+
+const db = require("./db/db.config");
+db.testConnection();
+db.sequelize.sync({ force: true });
+console.log("Dropped sensors table and re-built. (using force:true)");
 
 // //DB Connection.
 // //For now we place sensitive details in a separate file in git ignore,
@@ -33,6 +42,7 @@ app.use((req, res, next) => {
 app.use(bodyparser.urlencoded({ extended: true }));
 app.get("/", (req, res) => res.send("Service Operational!"));
 app.use("/devices", device_routes);
+app.use("/sensors", sensor_routes);
 
 // const jsonParser = bodyparser.json();
 

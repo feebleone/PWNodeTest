@@ -1,5 +1,9 @@
 //Add stores (mysql, reddis, ORMs, etc..)
 const devicesDB = require("../db/devices_db");
+
+const db = require("../db/db.config");
+const devices = db.sequelize.models.device;
+
 const { v4: uuidv4 } = require("uuid");
 
 const addOne = async (data) => {
@@ -24,8 +28,8 @@ const getOne = async (id) => {
   }
 };
 
-const getAll = async () => {
-  const results = await devicesDB.getAll();
+const getAll = async (tofind = null) => {
+  const results = await devicesDB.getAll(tofind);
   return results;
 };
 
