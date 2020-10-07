@@ -3,7 +3,7 @@ const sensorsService = require("../services/sensors_service");
 const getAll = async (req, res, next) => {
   try {
     console.log("Received sensors/GET");
-    const results = await sensorsService.getAll();
+    const results = await sensorsService.getAll(req.query.any);
     res.send(JSON.stringify(results));
   } catch (e) {
     console.log(e.message);

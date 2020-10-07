@@ -19,7 +19,9 @@ module.exports = (sequelize, Sequelize) => {
       deviceID: { type: Sequelize.UUID, allowNull: false },
     },
     {
-      indexes: [{ type: "FULLTEXT", name: "text_idx", fields: ["name"] }],
+      indexes: [
+        { type: "FULLTEXT", name: "text_idx", fields: ["name"] },
+      ],
     }
   );
 };
